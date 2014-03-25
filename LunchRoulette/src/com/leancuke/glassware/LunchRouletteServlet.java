@@ -2,19 +2,12 @@ package com.leancuke.glassware;
 
 import java.io.IOException;
 
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
-import com.google.api.client.json.jackson.JacksonFactory;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.services.mirror.Mirror;
-import com.google.api.services.mirror.Mirror.Timeline;
 import com.google.api.services.mirror.model.TimelineItem;
-import com.leancuke.glassware.auth.AuthUtils;
 
 @SuppressWarnings("serial")
 // START:randomlunch
@@ -38,22 +31,25 @@ public class LunchRouletteServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 
-		String userId = SessionUtils.getUserId(req);
-		Credential credential = AuthUtils.getCredential(userId);
+		// Ideally inserSimpleTextTimelineItem should be void and we should not
+		// accept object here. But, added it for debugging.
+		TimelineItem timelineitemResp = LunchRoulette
+				.insertSimpleTextTimelineItem(req);
 
-		Mirror mirror = new Mirror.Builder(new UrlFetchTransport(),
-				new JacksonFactory(), credential).setApplicationName(
-				"pthakkar Lunch Roulette").build();
-
-		Timeline timeline = mirror.timeline();
-		TimelineItem timelineitem = new TimelineItem()
-				.setText("Hello Parva, This is your app talking from mirror api server");
-
-		timeline.insert(timelineitem).execute();
-		
-		resp.setContentType("text/html");
-		resp.getWriter().print("<p>Just Inserted into timeline</p>");
+		// This items are unnecessary. Only for debugging.
+		resp.setContentType("text/text");
+		resp.getWriter().println(
+				"Just Inserted into timeline. Timeline item id is "
+						+ timelineitemResp.getId());
+		resp.getWriter().println(
+				"Timeline item's HTML content is  "
+						+ timelineitemResp.getHtml());
+		resp.getWriter().println("getText is " + timelineitemResp.getText());
+		resp.getWriter().println("getTitle is " + timelineitemResp.getTitle());
+		resp.getWriter().println(
+				"getUpdated is " + timelineitemResp.getUpdated());
+		resp.getWriter().println(
+				"getSelfLink is " + timelineitemResp.getSelfLink());
 
 	}
-
 }
