@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.api.services.mirror.model.TimelineItem;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 
 @SuppressWarnings("serial")
 // START:randomlunch
@@ -33,8 +34,19 @@ public class LunchRouletteServlet extends HttpServlet {
 
 		// Ideally inserSimpleTextTimelineItem should be void and we should not
 		// accept object here. But, added it for debugging.
-		TimelineItem timelineitemResp = LunchRoulette
-				.insertSimpleTextTimelineItem(req);
+		// TimelineItem timelineitemResp = LunchRoulette
+		// .insertSimpleTextTimelineItem(req);
+
+		// Ideally updateSimpleTextTimelineItem should be void and we should not
+		// accept object here. But, added it for debugging.
+		TimelineItem timelineitemResp = null;
+		try {
+			timelineitemResp = LunchRoulette
+					.updateSimpleTextTimelineItem(req);
+		} catch (EntityNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		// This items are unnecessary. Only for debugging.
 		resp.setContentType("text/text");

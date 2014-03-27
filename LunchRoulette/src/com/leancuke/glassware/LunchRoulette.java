@@ -4,17 +4,21 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.Random;
+import java.util.Date;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.mirror.Mirror;
 import com.google.api.services.mirror.Mirror.Timeline;
 import com.google.api.services.mirror.model.TimelineItem;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.KeyFactory;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -74,6 +78,21 @@ public class LunchRoulette {
 		return timelineitemResp;
 	}
 
+	public static TimelineItem updateSimpleTextTimelineItem(
+			HttpServletRequest req) throws IOException, EntityNotFoundException {
+		// gets mirror object from MirrorUtils file
+		String userId = SessionUtils.getUserId(req);
+		Mirror mirror = MirrorUtils.getMirror(req);
+
+		Timeline timeline = mirror.timeline();
+		TimelineItem timelineitem = new TimelineItem().setText(
+				getRandomLunchOption()).setUpdated(new DateTime(new Date()));
+
+		TimelineItem timelineitemResp = timeline.patch(
+				getLunchRoutellteId(userId), timelineitem).execute();
+		return timelineitemResp;
+	}
+
 	private static void setLunchRoutellteId(String userId, String id) {
 		com.google.appengine.api.datastore.DatastoreService store = DatastoreServiceFactory
 				.getDatastoreService();
@@ -82,6 +101,17 @@ public class LunchRoulette {
 		Entity entity = new Entity(key);
 		entity.setProperty("lastId", id);
 		store.put(entity);
+
+	}
+
+	private static String getLunchRoutellteId(String userId)
+			throws EntityNotFoundException {
+		com.google.appengine.api.datastore.DatastoreService store = DatastoreServiceFactory
+				.getDatastoreService();
+		com.google.appengine.api.datastore.Key key = KeyFactory.createKey(
+				LunchRoulette.class.getSimpleName(), userId);
+		Entity entity = store.get(key);
+		return (String) entity.getProperty("lastId");
 
 	}
 }
