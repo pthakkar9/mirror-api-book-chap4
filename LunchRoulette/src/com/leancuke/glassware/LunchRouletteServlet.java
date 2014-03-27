@@ -2,13 +2,13 @@ package com.leancuke.glassware;
 
 import java.io.IOException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.api.services.mirror.model.TimelineItem;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 
 @SuppressWarnings("serial")
 // START:randomlunch
@@ -32,21 +32,19 @@ public class LunchRouletteServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 
+		// LunchRoulette.deleteSimpleTextTimelineItem(req);
 		// Ideally inserSimpleTextTimelineItem should be void and we should not
 		// accept object here. But, added it for debugging.
-		// TimelineItem timelineitemResp = LunchRoulette
-		// .insertSimpleTextTimelineItem(req);
+//		 TimelineItem timelineitemResp = LunchRoulette
+//		 .insertSimpleTextTimelineItem(req);
 
-		// Ideally updateSimpleTextTimelineItem should be void and we should not
+		
+		// LunchRoulette.deleteSimpleTextTimelineItem(req);
+		// Ideally insertSimpleHTMLTimelineItem should be void and we should not
 		// accept object here. But, added it for debugging.
-		TimelineItem timelineitemResp = null;
-		try {
-			timelineitemResp = LunchRoulette
-					.updateSimpleTextTimelineItem(req);
-		} catch (EntityNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ServletContext ctx = getServletContext();
+		TimelineItem timelineitemResp = LunchRoulette
+				.insertSimpleHTMLTimelineItem(ctx, req);
 
 		// This items are unnecessary. Only for debugging.
 		resp.setContentType("text/text");

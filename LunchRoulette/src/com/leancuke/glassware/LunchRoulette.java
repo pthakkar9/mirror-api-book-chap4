@@ -2,6 +2,7 @@ package com.leancuke.glassware;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.Date;
@@ -46,7 +47,8 @@ public class LunchRoulette {
 	// via project "Properties".
 	// START:render
 	public static String render(ServletContext ctx, String template,
-			Map<String, Object> data) throws IOException, ServletException {
+			Map<String, ? extends Object> data) throws IOException,
+			ServletException {
 		Configuration config = new Configuration();
 		config.setServletContextForTemplateLoading(ctx, "WEB-INF/views");
 		config.setDefaultEncoding("UTF-8");
@@ -63,6 +65,34 @@ public class LunchRoulette {
 
 	// END:render
 
+	public static TimelineItem insertSimpleHTMLTimelineItem(ServletContext ctx,
+			HttpServletRequest req) throws IOException, ServletException {
+		// gets mirror object from MirrorUtils file
+		String userId = SessionUtils.getUserId(req);
+		Mirror mirror = MirrorUtils.getMirror(req);
+		Timeline timeline = mirror.timeline();
+
+		String cuisine = getRandomLunchOption();
+		Map<String, String> data = Collections.singletonMap("food", cuisine);
+		String html = render(ctx, "glass/cuisine.ftl", data);
+		TimelineItem timelineitem = new TimelineItem().setHtml(html)
+				.setUpdated(new DateTime(new Date())).setTitle("pthakkar9")
+				.setSpeakableText("Parva says You should eat " + cuisine + " for lunch");
+
+		TimelineItem timelineitemResp;
+
+		if (getLunchRoutellteId(userId) == null) {
+			timelineitemResp = timeline.insert(timelineitem).execute();
+		} else {
+			timelineitemResp = timeline.patch(getLunchRoutellteId(userId),
+					timelineitem).execute();
+
+		}
+
+		setLunchRoutellteId(userId, timelineitemResp.getId());
+		return timelineitemResp;
+	}
+
 	public static TimelineItem insertSimpleTextTimelineItem(
 			HttpServletRequest req) throws IOException {
 		// gets mirror object from MirrorUtils file
@@ -70,27 +100,59 @@ public class LunchRoulette {
 		Mirror mirror = MirrorUtils.getMirror(req);
 
 		Timeline timeline = mirror.timeline();
-		TimelineItem timelineitem = new TimelineItem().setText(
-				LunchRoulette.getRandomLunchOption()).setTitle("pthakkar9");
+		TimelineItem timelineitem = new TimelineItem()
+				.setText(LunchRoulette.getRandomLunchOption())
+				.setUpdated(new DateTime(new Date())).setTitle("pthakkar9");
 
-		TimelineItem timelineitemResp = timeline.insert(timelineitem).execute();
+		TimelineItem timelineitemResp;
+
+		if (getLunchRoutellteId(userId) == null) {
+			timelineitemResp = timeline.insert(timelineitem).execute();
+		} else {
+			timelineitemResp = timeline.patch(getLunchRoutellteId(userId),
+					timelineitem).execute();
+
+		}
+
 		setLunchRoutellteId(userId, timelineitemResp.getId());
 		return timelineitemResp;
 	}
 
-	public static TimelineItem updateSimpleTextTimelineItem(
-			HttpServletRequest req) throws IOException, EntityNotFoundException {
+	// Deprecated function. Combined with addSimpleTextTimelineItem
+	// public static TimelineItem updateSimpleTextTimelineItem(
+	// HttpServletRequest req) throws IOException {
+	// // gets mirror object from MirrorUtils file
+	// String userId = SessionUtils.getUserId(req);
+	// Mirror mirror = MirrorUtils.getMirror(req);
+	//
+	// Timeline timeline = mirror.timeline();
+	// TimelineItem timelineitem = new TimelineItem().setText(
+	// getRandomLunchOption()).setUpdated(new DateTime(new Date()));
+	//
+	// TimelineItem timelineitemResp = timeline.patch(
+	// getLunchRoutellteId(userId), timelineitem).execute();
+	//
+	// return timelineitemResp;
+	// }
+
+	public static void deleteSimpleTextTimelineItem(HttpServletRequest req)
+			throws IOException {
 		// gets mirror object from MirrorUtils file
 		String userId = SessionUtils.getUserId(req);
 		Mirror mirror = MirrorUtils.getMirror(req);
 
 		Timeline timeline = mirror.timeline();
-		TimelineItem timelineitem = new TimelineItem().setText(
-				getRandomLunchOption()).setUpdated(new DateTime(new Date()));
 
-		TimelineItem timelineitemResp = timeline.patch(
-				getLunchRoutellteId(userId), timelineitem).execute();
-		return timelineitemResp;
+		if (getLunchRoutellteId(userId) == null) {
+			return;
+		} else {
+			timeline.delete(getLunchRoutellteId(userId)).execute();
+
+		}
+
+		// TODO: Delete data from datastore too. Unless this is done, this
+		// method cannot be used.
+
 	}
 
 	private static void setLunchRoutellteId(String userId, String id) {
@@ -104,13 +166,17 @@ public class LunchRoulette {
 
 	}
 
-	private static String getLunchRoutellteId(String userId)
-			throws EntityNotFoundException {
+	private static String getLunchRoutellteId(String userId) {
 		com.google.appengine.api.datastore.DatastoreService store = DatastoreServiceFactory
 				.getDatastoreService();
 		com.google.appengine.api.datastore.Key key = KeyFactory.createKey(
 				LunchRoulette.class.getSimpleName(), userId);
-		Entity entity = store.get(key);
+		Entity entity;
+		try {
+			entity = store.get(key);
+		} catch (EntityNotFoundException e) {
+			return null;
+		}
 		return (String) entity.getProperty("lastId");
 
 	}
