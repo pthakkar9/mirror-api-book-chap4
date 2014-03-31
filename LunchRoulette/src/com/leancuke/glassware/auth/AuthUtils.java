@@ -24,8 +24,8 @@ public final class AuthUtils
     "https://www.googleapis.com/auth/glass.timeline"
   );
   public static final String WEB_CLIENT_ID =
-      "391240315713.apps.googleusercontent.com";
-  public static final String WEB_CLIENT_SECRET = "d8DXGWg04leb9FtZZf1zwcg6";
+      "<your app>.apps.googleusercontent.com";
+  public static final String WEB_CLIENT_SECRET = "<secret id>";
   public static final String OAUTH2_PATH = "/oauth2callback";
 // END:configs
 
