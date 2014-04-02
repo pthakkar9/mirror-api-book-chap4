@@ -48,6 +48,7 @@ public class LunchRouletteServlet extends HttpServlet {
 
 		// This items are unnecessary. Only for debugging.
 		resp.setContentType("text/text");
+		resp.getWriter().println("This is just for debugging!");
 		resp.getWriter().println(
 				"Just Inserted into timeline. Timeline item id is "
 						+ timelineitemResp.getId());

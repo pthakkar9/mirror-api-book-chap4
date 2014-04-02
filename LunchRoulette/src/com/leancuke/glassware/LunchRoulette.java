@@ -75,9 +75,12 @@ public class LunchRoulette {
 		String cuisine = getRandomLunchOption();
 		Map<String, String> data = Collections.singletonMap("food", cuisine);
 		String html = render(ctx, "glass/cuisine.ftl", data);
-		TimelineItem timelineitem = new TimelineItem().setHtml(html)
-				.setUpdated(new DateTime(new Date())).setTitle("pthakkar9")
-				.setSpeakableText("Parva says You should eat " + cuisine + " for lunch");
+		TimelineItem timelineitem = new TimelineItem()
+				.setHtml(html)
+				.setUpdated(new DateTime(new Date()))
+				.setTitle("pthakkar9")
+				.setSpeakableText(
+						"Parva says You should eat " + cuisine + " for lunch");
 
 		TimelineItem timelineitemResp;
 
@@ -109,8 +112,20 @@ public class LunchRoulette {
 		if (getLunchRoutellteId(userId) == null) {
 			timelineitemResp = timeline.insert(timelineitem).execute();
 		} else {
-			timelineitemResp = timeline.patch(getLunchRoutellteId(userId),
-					timelineitem).execute();
+			try {
+				timelineitemResp = timeline.patch(getLunchRoutellteId(userId),
+						timelineitem).execute();
+			} catch (Exception e) {
+				// I sometimes get server error when timeline item id exists in
+				// datastore, but is expired on google outh2 framework. So, I
+				// should change try/catch to if condition that checks for
+				// expiration. I yet don't know how to do it, so I surrounded it
+				// by try/catch with an assumption that whenever expired item id
+				// is found, it'll try to path and will find exception. With
+				// this exception found, it'll go to catch section and then try
+				// to insert a new timeline card, which is excactly what I want.
+				timelineitemResp = timeline.insert(timelineitem).execute();
+			}
 
 		}
 
