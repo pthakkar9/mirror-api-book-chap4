@@ -75,6 +75,7 @@ public class LunchRoulette {
 
 		t.getMenuItems().add(new MenuItem().setAction("READ_ALOUD"));
 		t.getMenuItems().add(new MenuItem().setAction("DELETE"));
+		t.getMenuItems().add(new MenuItem().setAction("TOGGLE_PINNED"));
 
 	}
 
@@ -110,6 +111,7 @@ public class LunchRoulette {
 				.setUpdated(new DateTime(new Date()))
 				.setTitle("pthakkar9")
 				.setBundleId(bundleId)
+				.setIsPinned(true)
 				.setSpeakableText(
 						"Parva says You should eat " + cuisine2 + " for lunch");
 		insertSimpleMenuItems(timelineitem2);
@@ -122,6 +124,7 @@ public class LunchRoulette {
 				.setUpdated(new DateTime(new Date()))
 				.setTitle("pthakkar9")
 				.setBundleId(bundleId)
+				.setIsPinned(true)
 				.setSpeakableText(
 						"Parva says You should eat " + cuisine3 + " for lunch");
 		insertSimpleMenuItems(timelineitem3);

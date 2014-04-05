@@ -4,6 +4,6 @@
     <cron>
         <url>/lunchcron</url>
         <description>New lunch option gets fired every hour</description>
-        <schedule>every 1 minutes</schedule>
+        <schedule>every 5 minutes</schedule>
     </cron>
 </cronentries>
