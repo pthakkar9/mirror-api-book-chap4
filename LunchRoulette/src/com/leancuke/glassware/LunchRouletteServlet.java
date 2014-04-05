@@ -35,20 +35,22 @@ public class LunchRouletteServlet extends HttpServlet {
 		// LunchRoulette.deleteSimpleTextTimelineItem(req);
 		// Ideally inserSimpleTextTimelineItem should be void and we should not
 		// accept object here. But, added it for debugging.
-//		 TimelineItem timelineitemResp = LunchRoulette
-//		 .insertSimpleTextTimelineItem(req);
+		// TimelineItem timelineitemResp = LunchRoulette
+		// .insertSimpleTextTimelineItem(req);
 
-		
 		// LunchRoulette.deleteSimpleTextTimelineItem(req);
 		// Ideally insertSimpleHTMLTimelineItem should be void and we should not
 		// accept object here. But, added it for debugging.
 		ServletContext ctx = getServletContext();
-		TimelineItem timelineitemResp = LunchRoulette
-				.insertSimpleHTMLTimelineItem(ctx, req);
+		// TimelineItem timelineitemResp = LunchRoulette
+		// .insertSimpleHTMLTimelineItem(ctx, req);
 
+		TimelineItem timelineitemResp = LunchRoulette
+				.insertMultiHTMLTimelineItem(ctx, req);
 		// This items are unnecessary. Only for debugging.
 		resp.setContentType("text/text");
-		resp.getWriter().println("This is just for debugging!");
+		resp.getWriter().println("This is just for debugging! \n\n\n");
+
 		resp.getWriter().println(
 				"Just Inserted into timeline. Timeline item id is "
 						+ timelineitemResp.getId());

@@ -3,9 +3,12 @@ package com.leancuke.glassware;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collections;
+
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -14,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.mirror.Mirror;
 import com.google.api.services.mirror.Mirror.Timeline;
+import com.google.api.services.mirror.model.MenuItem;
 import com.google.api.services.mirror.model.TimelineItem;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -65,6 +69,85 @@ public class LunchRoulette {
 
 	// END:render
 
+	public static void insertSimpleMenuItems(TimelineItem t) {
+
+		t.setMenuItems(new LinkedList<MenuItem>());
+
+		t.getMenuItems().add(new MenuItem().setAction("READ_ALOUD"));
+		t.getMenuItems().add(new MenuItem().setAction("DELETE"));
+
+	}
+
+	public static TimelineItem insertMultiHTMLTimelineItem(ServletContext ctx,
+			HttpServletRequest req) throws IOException, ServletException {
+
+		// gets mirror object from MirrorUtils file
+		String bundleId = "Item Id" + UUID.randomUUID();
+		String userId = SessionUtils.getUserId(req);
+		Mirror mirror = MirrorUtils.getMirror(req);
+		Timeline timeline = mirror.timeline();
+
+		String cuisine1 = getRandomLunchOption();
+		Map<String, String> data = Collections.singletonMap("food", cuisine1);
+		String html1 = render(ctx, "glass/cuisine.ftl", data);
+		TimelineItem timelineitem1 = new TimelineItem()
+				.setHtml(html1)
+				.setUpdated(new DateTime(new Date()))
+				.setTitle("pthakkar9")
+				.setBundleId(bundleId)
+				.setIsPinned(true)
+				.setSpeakableText(
+						"Parva says You should eat " + cuisine1 + " for lunch")
+				.setIsBundleCover(true);
+
+		insertSimpleMenuItems(timelineitem1);
+
+		// This is not DRY. I should move it to some function
+		String cuisine2 = getRandomLunchOption();
+		String html2 = render(ctx, "glass/cuisine.ftl", data);
+		TimelineItem timelineitem2 = new TimelineItem()
+				.setHtml(html2)
+				.setUpdated(new DateTime(new Date()))
+				.setTitle("pthakkar9")
+				.setBundleId(bundleId)
+				.setSpeakableText(
+						"Parva says You should eat " + cuisine2 + " for lunch");
+		insertSimpleMenuItems(timelineitem2);
+
+		// This is not DRY. I should move it to some function
+		String cuisine3 = getRandomLunchOption();
+		String html3 = render(ctx, "glass/cuisine.ftl", data);
+		TimelineItem timelineitem3 = new TimelineItem()
+				.setHtml(html3)
+				.setUpdated(new DateTime(new Date()))
+				.setTitle("pthakkar9")
+				.setBundleId(bundleId)
+				.setSpeakableText(
+						"Parva says You should eat " + cuisine3 + " for lunch");
+		insertSimpleMenuItems(timelineitem3);
+
+		TimelineItem timelineitemResp;
+
+		if (getLunchRoutellteId(userId) == null) {
+			timelineitemResp = timeline.insert(timelineitem1).execute();
+			timelineitemResp = timeline.insert(timelineitem2).execute();
+			timelineitemResp = timeline.insert(timelineitem3).execute();
+
+		} else {
+			timelineitemResp = timeline.patch(getLunchRoutellteId(userId),
+					timelineitem1).execute();
+			timelineitemResp = timeline.patch(getLunchRoutellteId(userId),
+					timelineitem2).execute();
+			timelineitemResp = timeline.patch(getLunchRoutellteId(userId),
+					timelineitem3).execute();
+
+		}
+
+		setLunchRoutellteId(userId, timelineitemResp.getId());
+		return timelineitemResp;
+
+	}
+
 	public static TimelineItem insertSimpleHTMLTimelineItem(ServletContext ctx,
 			HttpServletRequest req) throws IOException, ServletException {
 		// gets mirror object from MirrorUtils file
@@ -81,6 +164,8 @@ public class LunchRoulette {
 				.setTitle("pthakkar9")
 				.setSpeakableText(
 						"Parva says You should eat " + cuisine + " for lunch");
+
+		insertSimpleMenuItems(timelineitem);
 
 		TimelineItem timelineitemResp;
 
